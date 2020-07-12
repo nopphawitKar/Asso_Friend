@@ -1,0 +1,432 @@
+﻿/*Global*/
+html,body{
+  height: 100%;
+  font-family: 'Kanit', sans-serif;
+  cursor: pointer;
+}
+
+#main_container {
+  max-width: 980px;
+  margin: 0 auto;
+  margin-top: 50px;
+}
+
+.container_board {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.container_block {
+  display: flex;
+  width: 440px;
+  /* margin-left: 10px!important;
+  margin-right: 10px!important; */
+}
+
+.display_none {
+  display: none;
+}
+
+.display_inline {
+  display: block;
+}
+
+.right {
+  float: right;
+}
+.text_align_center{
+  text-align: center;
+}
+.nes-input-number {
+  text-align: right;
+}
+
+.nes-input-text {
+  text-align: left;
+}
+#root, .App{
+  height: 100%;
+}
+
+.Head-bar {
+  background: white;
+  background: #c5170e;
+  height: 70px;
+  width: 1000px;
+}
+
+.Head-bar .text{
+  padding-top: 20px;
+  color: white;
+  text-align: left;
+  font-weight: bold;
+  /* font-size: 20px; */
+  font-size: 15px;
+  padding-left: 20px;
+}
+
+.Question-text {
+  padding-left: 20px;
+  width: 1000px;
+  font-family: "Times New Roman", Times, serif;
+
+  font-size: 15px;
+  font-family: "Press Start 2P";
+}
+
+/*Override_fontawesome*/
+.svg-inline--fa {
+  color: white;
+}
+/*understand*/
+.timer {
+  position: fixed;
+  right: 80px;
+  top: 220px;
+  width: 50px;
+}
+
+.timer-icon{
+  position: fixed!important;
+  top: 190px;
+  right: 90px;
+}
+
+/*Util_plain_text*/
+.paper_line{
+  fill:white;
+  stroke-width:3;
+  stroke:#c7c7c7;
+}
+
+/* text {
+  pointer-events: all;
+} */
+/*Util_indent_tree*/
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 0.5px;
+   pointer-events: all;
+}
+
+/* .node text {
+  font: 12px sans-serif;
+} */
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+  pointer-events: none;
+}
+
+/*Util_indent_tag*/
+.node rect {
+  cursor: pointer;
+  fill: #fff;
+  fill-opacity: 0.5;
+  stroke: #3182bd;
+  stroke-width: 1.5px;
+}
+
+.node text {
+  font: 8px sans-serif;
+  pointer-events: all;
+}
+
+.link {
+  fill: none;
+  stroke: #9ecae1;
+  stroke-width: 1.5px;
+  pointer-events: none!important
+}
+
+
+.understandGraph svg{
+  border: solid 1px;
+  margin-top: 10px;
+  /* width: 500px; */
+}
+
+/*.understandGraph svg g{
+  fill: none;
+}*/
+
+/*Util_table_tool*/
+.understandGraph .block {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+  float: left;
+}
+
+rect.box_title {
+  stroke-width: 1px;
+  /* stroke: black; */
+  fill: #c5170e;
+  cursor: pointer;
+}
+
+g > .title_text {
+  padding-left: 20px;
+  width: 1000px;
+  fill: white;
+}
+
+rect.tabletool_top {
+    stroke-width: 1px;
+    stroke: black;
+    fill: #ffac00;
+    cursor: pointer;
+}
+
+g > .box_text {
+  font: bold 20px sans-serif;
+  /* pointer-events: all; */
+}
+
+/* g > text:hover{
+  display: none;
+} */
+
+/*App*/
+.App-container {
+  height: 100%;
+  margin-top: 200px;
+}
+
+/*Signup*/
+.Signup-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  padding: 10px;
+}
+.Signup-form {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto auto auto;
+  padding: 10px;
+  grid-column: 2 / span 1;
+}
+.Signup-label {
+  grid-column: 3 / span 2;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.Signup-input-field {
+  grid-column: 4 / span 2;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.Signup-button {
+  grid-column: 4 / span 2;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+/*Login*/
+.Login-container {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 33% 33% 33%;
+  padding: 10px;
+}
+
+.Login-container > img {
+  grid-column: 1 / span 1;
+  grid-row: 1/span 3;
+  width: 100%;
+}
+
+@media (min-width: 601px){
+  .Login-form {
+    display: grid;
+    grid-template-columns: 100px 400px;
+    padding: 10px;
+    grid-column: 2 / span 1;
+    grid-row: 2/span 3;
+    height: 10%;
+  }
+}
+
+@media (min-width: 601px){
+  .Login-form > label{
+    grid-column: 1 / span 1;
+  }
+}
+
+@media (min-width: 601px){
+  .Login-input-field {
+    grid-column: 2 / span 1;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+}
+
+@media (min-width: 601px){
+  .Login-button {
+    grid-column: 2 / span 1;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+}
+
+@media (max-width: 601px){
+  .Login-form {
+    display: grid;
+    grid-template-columns: auto auto;
+    padding: 10px;
+    grid-column: 2 / span 1;
+    grid-row: 2/span 3;
+    height: 10%;
+  }
+}
+
+@media (max-width: 601px){
+  .Login-form > label{
+    grid-column: 1 / span 1;
+  }
+}
+
+@media (max-width: 601px){
+  .Login-input-field {
+    grid-column: 2 / span 1;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+}
+
+@media (max-width: 601px){
+  .Login-button {
+    grid-column: 2 / span 1;
+    margin-top: 5px;
+    margin-left: 5px;
+  }
+}
+/*Dashboard*/
+.nes-container-center-overwrite {
+  max-width: 500px!important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.nes-container-normal {
+  max-width: 500px!important;
+}
+.Dashboard-container {
+  /*display: grid;
+  grid-template-columns: auto auto auto auto;*/
+  /*grid-template-rows: 230px 230px 230px 230px 230px 230px 230px;*/
+/*  grid-template-rows: 50% 50%;
+  height: 100%;*/
+/*  padding-left: 10%;
+  padding-right: 10%;*/
+}
+
+.Dashboard-container img {
+  /*height: 100%;*/
+  /*vertical and centre*/
+  height: 100%;
+  /*width: 100%;*/
+  float: left;
+  position: absolute;
+  /*height: 100%;*/
+  /*display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;*/
+  /*grid-column: span 2;
+  grid-row: span 1;*/
+}
+
+.Dashboard-overlay {
+    width: 200px;
+    height: 100px;
+    background: white;
+    position: absolute;
+    background: #c5170e;
+}
+
+.Dashboard-overlay > .text {
+    margin-top: 25px;
+    margin-left: 25px;
+    margin-right: 25px;
+    margin-bottom: 25px;
+
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/*Understand*/
+.Understand-container {
+
+}
+
+.Understand-test-part {
+  width: 1000px;
+  min-width: 1000px;
+  max-width: 1000px;
+  height: 100%;
+  /* float: left; */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.Understand-progress-box {
+  width: 500px;
+  min-width: 500px;
+  height: 100%;
+  border: solid 1px;
+  float: left;
+  margin-left: 50px;
+  background-color: #c5170e;
+}
+
+.Understand-progress-bar {
+  width: 500px;
+  min-width: 500px;
+  height: 50px;
+  border: solid 1px;
+  float: left;
+
+  padding-top: 20px;
+  /*padding-left: 10px;*/
+}
+
+.Understand-progress-bar svg{
+  margin-left: 20px;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 28px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 28px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+    background-color: white;
+}

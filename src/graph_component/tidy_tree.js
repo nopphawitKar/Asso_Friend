@@ -87,11 +87,12 @@ export function create(treeData, selector, width, height) {
 					.on("mouseenter", function(d){
 						console.log("over" + d.id)
 						return tooltip.html(d.data.name)
+						.style("left", (30 + d3.event.pageX) + "px")
+						.style("top", (30 + d3.event.pageY) + "px")
 								.style("visibility", "visible")
 								.transition()
                .duration('300')
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY) + "px");
+
 					})
 					.on("mouseleave", function(d){
 						console.log("out" + d.id)

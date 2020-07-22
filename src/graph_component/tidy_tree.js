@@ -85,7 +85,6 @@ export function create(treeData, selector, width, height) {
 		          return d._children ? "lightsteelblue" : "#fff";
 		      })
 					.on("mouseenter", function(d){
-						console.log("over" + d.id)
 						return tooltip.html(d.data.name)
 						.style("left", (30 + d3.event.pageX) + "px")
 						.style("top", (30 + d3.event.pageY) + "px")
@@ -95,7 +94,6 @@ export function create(treeData, selector, width, height) {
 
 					})
 					.on("mouseleave", function(d){
-						console.log("out" + d.id)
 						tooltip.html(d.data.name)
 								.style("visibility", "hidden")
 								.transition()

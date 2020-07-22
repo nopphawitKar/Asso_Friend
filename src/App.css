@@ -4,7 +4,44 @@ html,body{
   font-family: 'Kanit', sans-serif;
   cursor: pointer;
 }
+select {
+  display: inline-block;
+  width: 500px;
+}
+/*rsuite select*/
+.css-2b097c-container {
+  width: 200px;
+  display: inline-block;
+}
+/*rsuite input*/
+.rs-input {
+  width: 200px!important;
+  display: inline-block!important;
+}
 
+.divline {
+  min-width: 300px;
+  max-width: 300px;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.divfullline {
+  min-width: 300px;
+  max-width: 100%;
+  margin-bottom: 10px;
+}
+label {
+  padding-right: 10px;
+}
+
+section {
+  min-width: 500px;
+}
+
+.rs-slider {
+  margin-bottom: 10px;
+}
 #main_container {
   max-width: 980px;
   margin: 0 auto;

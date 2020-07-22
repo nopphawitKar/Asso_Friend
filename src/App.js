@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import { Container, Button, TextInput, Progress, Icon } from "nes-react";
 import Select from 'react-select';
+import {Input, Slider, RangeSlider} from 'rsuite';
 import nesTheme from 'react-select-nes-css-theme';
 import './App.css';
 import './extra.css';
+import 'rsuite/dist/styles/rsuite-default.css';
 
 import * as plaintextGraph from './graph_component/Util_plain_text.js';
 import * as tidyTreeGraph from './graph_component/tidy_tree.js';
@@ -15,13 +17,18 @@ import * as dendrogram from './graph_component/dendrogram.js'
 import * as radialdendrogram from './graph_component/radial_dendrogram.js'
 
 var sizeof = require('object-sizeof')
-var timeMessage = "asdfasdf";
-var width = 800;
-var height = 600;
-function domWatcher(){
-  // Select the node that will be observed for mutations
-  const targetNode = document.getElementById('graph');
-}
+var width = 1500;
+var height = 1500;
+var lift = 1;
+var rulesNum = 0;
+
+var supValueConsole = 0;
+var confValueConsole = {init: 0, des: 1};
+var liftOpConsole = ">=";
+var liftValueConsole = 0;
+
+var fileText = "";
+
 function App() {
   const DOM_GRAPH_CLASS = ".understandGraph";
   const GRAPH_PLAINTEXT = 0;
@@ -32,39 +39,27 @@ function App() {
   const GRAPH_DENDROGRAM = 5;
   const GRAPH_RADIALDENDROGRAM = 6;
   const [graphType, setGraphType] = useState(0);
+
   const [graphData, setGraphData] = useState();
-  const [width, setWidth] = useState(800);
-  const [height, setHeight] = useState(600);
+  const [filteredGraphData, setFilteredGraphData] = useState();
+  const [width, setWidth] = useState(1500);
+  const [height, setHeight] = useState(1500);
   const reader = new FileReader();
-  // var jsonRules = {name:'begin', children:[]};
-
-  function graphEvent(){
-    alert('change');
-  }
-  function getByte(){
-    var el = document.getElementById("graph");
-    var html = el.innerHTML;
-
-    // alert(html.length + "***" +     document.lastModified);
-    alert("jsHeapSizeLimit" + window.performance.memory.jsHeapSizeLimit +
-    "totalJSHeapSize" + window.performance.memory.totalJSHeapSize +
-    "usedJSHeapSize" + window.performance.memory.usedJSHeapSize);
 
 
-  }
 
-  function timeCallBack(){
-    var time = new Date();
-    alert(time.getTime())
-  }
-  function handleGraphTypeChange(){
+  useEffect(() => {
+    onFileExplorer();
+  }, []);
+
+  function handleGraphTypeChange(graphData){
+
     clearGraph();
     // var before = new Date();
     if(graphType.value == GRAPH_PLAINTEXT){
       plaintextGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
     }else if(graphType.value == GRAPH_INDENTTREE){
       tidyTreeGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
-      // console.log(sizeof(indentTreeByte) + "size");
     }else if(graphType.value == GRAPH_INDENTTAG){
       indenttreeGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
     }else if(graphType.value == GRAPH_TABLETOOL){
@@ -75,6 +70,9 @@ function App() {
         dendrogram.create(graphData, DOM_GRAPH_CLASS, width, height);
     }else if(graphType.value == GRAPH_RADIALDENDROGRAM){
         radialdendrogram.create(graphData, DOM_GRAPH_CLASS, width, height);
+    }else{
+      //default
+      tidyTreeGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
     }
   }
 
@@ -82,7 +80,7 @@ function App() {
     var graph = document.getElementById("graph");
     graph.innerHTML = '';
   }
-  function onUiListener(){
+  function onFileExplorer(){
     const uploadButton = document.querySelector('.browse-btn');
     const fileInfo = document.querySelector('.file-info');
     const realInput = document.getElementById('files');
@@ -112,7 +110,8 @@ function App() {
     if (file){
       reader.onload = function(e){
         try {
-          rulesToJson(e.target.result);
+          setFileText(e.target.result);
+          // rulesToJson(e.target.result);
         } catch(e) {
             alert("file syntyx is not supported.");
         }
@@ -142,39 +141,97 @@ function App() {
     }
     return -1;
   }
-  function rulesToJson(inputText){
 
-    var rules = inputText.split("\n");
+  function getInterestingnessMeasure(consequent){
+    var conf = "";
+    var CONF_TEXT = "";
+    const COLON = ":";
+    const SPACE = " ";
+    const LEFT_BRACLET = "(";
+    const RIGHT_BRACLET = ")";
+    const LEFT_TRI_BRACLET = "<";
+    const RIGHT_TRI_BRACLET = ">";
 
+    var lift = "";
+    var LIFT_TEXT = "";
+
+    //get confidence
+    if(consequent.includes("<conf")){
+      CONF_TEXT = "<conf";
+    }else{
+      CONF_TEXT = "conf";
+    }
+    conf = consequent.split(CONF_TEXT)[1].trim();
+    conf = conf.split(COLON)[1].trim();
+    conf = conf.split(SPACE)[0].trim();
+    conf = conf.replace(LEFT_BRACLET, SPACE).replace(RIGHT_BRACLET, SPACE);
+    conf = conf.replace(LEFT_TRI_BRACLET, SPACE).replace(RIGHT_TRI_BRACLET, SPACE);
+    // console.log("conf: " + conf);
+
+    if(consequent.includes("<lift")){
+      LIFT_TEXT = "<lift";
+    }else{
+      LIFT_TEXT = "lift";
+    }
+    lift = consequent.split(LIFT_TEXT)[1].trim();
+    lift = lift.split(COLON)[1].trim();
+    lift = lift.split(SPACE)[0].trim();
+    lift = lift.replace(LEFT_BRACLET, SPACE);
+    lift = lift.replace(RIGHT_BRACLET, SPACE);
+    lift = lift.replace(LEFT_TRI_BRACLET, SPACE).replace(RIGHT_TRI_BRACLET, SPACE);
+    // console.log("lift: " + lift);
+
+    // var sup = consequent.split(CONF_TEXT)[0].trim();
+    // sup = sup.split(SPACE)[1].trim();
+    // console.log("sup: " + sup + " ruleCount: " + rulesNum);
+    return {conf: conf, lift: lift};
+  }
+  // function isInRangeLift(lift){
+  //   liftOpConsole
+  //   if(liftOpConsole == "<"){
+  //
+  //   }
+  // }
+
+  function rulesToJson(){
+    var rules = fileText.split("\n");
     var jsonRules = {name:'begin', children:[]};
-
-
+    var isInFiltered = true;
+    rulesNum = rules.length;
     //loop all rules
      for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
       var thisRule = jsonRules;
-
       var rule = rules[ruleIndex];
+
+      if(rule==""){
+        // console.log("empty string");
+        break;
+      }
+
       rule = rule.trim().split(/. (.+)/)[1];
-
       var antecedent = rule.split("==>")[0].trim();
-
       var antecedentArray = antecedent.split(' ');
       antecedentArray.pop();
       var consequent = rule.split("==>")[1].trim();
-      // if(consequent.includes("<conf")){
-      //   consequent = consequent.split("<conf")[0].trim();
-      // }else{
-      //   consequent = consequent.split("conf")[0].trim();
-      // }
-      //
-      // consequent = consequent.split(" ");
-      // consequent.pop();
+
+
+      var interestingnessMeasures = getInterestingnessMeasure(consequent);
+      if(interestingnessMeasures.conf < confValueConsole.init
+        || interestingnessMeasures.conf > confValueConsole.des){
+        // console.log(interestingnessMeasures.conf)
+        continue;
+      }
+      if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
+        continue;
+      }
+
+      // if(interestingnessMeasures.lift < )
+
       consequent = consequent.toString();
 
       //loop all antecedent
       for(var i = 0; i<antecedentArray.length; i++){
         var nodeName = antecedentArray[i];
-
         var form = {name:nodeName, children:[]};
         var dupChildIndex = getDupChildIndex(thisRule, antecedentArray[i]);
         if(dupChildIndex == -1){//not duplicate
@@ -184,58 +241,98 @@ function App() {
           thisRule = thisRule.children[dupChildIndex];
         }
       }
-
       //add consequent
-      var form = {name:consequent, children:[]};
+      var form = {name:consequent};
       thisRule.children.push(form);
-
-      setGraphData(jsonRules)
-    };
+    }
+    // setGraphData(thisRule)
+    handleGraphTypeChange(thisRule);
+    // setFilteredGraphData(thisRule);
   }
-  useEffect(() => {
-    // onUiListener();
-    handleGraphTypeChange();
 
-  });
+  function setSup(value){
+    supValueConsole = value;
+  }
 
-  useEffect(() => {
-    onUiListener();
-    domWatcher();
-    // console.log('effect');
+  function setConf(value){
+    confValueConsole.init = value[0];
+    confValueConsole.des = value[1];
+  }
 
-    // handleGraphTypeChange();
-  }, []);
+  function setLiftOp(value){
+    liftOpConsole = value.value;
+  }
+  function setLift(value){
+    liftValueConsole = value;
+  }
+
+  function setFileText(value){
+    fileText = value;
+  }
   return (
     <div className="App">
       <Container>
         <div className='line'>
           <input type="file" id="files" name="file" />
           <Button className='browse-btn'>Browse Files</Button>
-          <span class="file-info">Upload a file</span>
+        <span className="file-info">Upload a file</span>
         </div>
         <div className='line'>
           <div id="byte_content"></div>
         </div>
       </Container>
-      <Button onClick={getByte}>get byte</Button>
-      <div>{timeMessage}</div>
+
         <div className='line graphStyle'>
-          <input type="text" onChange={e => setWidth(e.target.value)} value={width}/>
-          <input type="text" onChange={e => setHeight(e.target.value)} value={height}/>
-          <Select
-            value={graphType}
-            styles={nesTheme} // HERE: Pass the theme object as a prop
-            onChange={setGraphType}
-            options={[
-              { value: 0, label: 'plain text' },
-              { value: 1, label: 'tidy tree' },
-              { value: 2, label: 'indented tree' },
-              { value: 3, label: 'table tool' },
-              { value: 4, label: 'radial tidy tree'},
-              { value: 5, label: 'dendrogram'},
-              { value: 6, label: 'radial dendrogram'}
-            ]}
-          />
+          <Container>
+            <div className="divline">
+              <label>Width:  </label>
+              <Input type="text" onChange={setWidth} value={width}/>
+            </div>
+            <div className="divline">
+              <label>Height:  </label>
+              <Input type="text" onChange={setHeight} value={height}/>
+            </div>
+            <div className="divline">
+              <label>Graph Type:  </label>
+                <Select
+                  placeholder={"tidy tree"}
+                  value={graphType}
+                  onChange={setGraphType}
+                  options={[
+                    // { value: 0, label: 'plain text' },
+                    { value: 1, label: 'tidy tree' },
+                    // { value: 2, label: 'indented tree' },
+                    // { value: 3, label: 'table tool' },
+                    { value: 4, label: 'radial tidy tree'},
+                    { value: 5, label: 'dendrogram'},
+                    { value: 6, label: 'radial dendrogram'}
+                  ]}
+                />
+            </div>
+            <div className="divfullline">
+
+              <label>Confidence</label>
+              <RangeSlider defaultValue={[0, 1]} step={0.1} max={1} onChange={setConf}/>
+              <label>Lift</label>
+                <Select
+                  placeholder={">="}
+                  onChange={setLiftOp}
+                  options={[
+                    { value: '<', label: '<' },
+                    { value: '<=', label: '<=' },
+                    { value: '=', label: '=' },
+                    { value: '>=', label: '>=' },
+                    { value: '>', label: '>'}
+                  ]}
+                />
+              <Input type="number" defaultValue={0} onChange={setLift}/>
+            </div>
+            <div className="divfullline">
+              <Button onClick={rulesToJson}>Create Graph</Button>
+            </div>
+          </Container>
+
+
         </div>
         <div id="graph" className="understandGraph" style={{visibility: 'visible'}} ></div>
     </div>

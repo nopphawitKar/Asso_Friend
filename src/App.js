@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
 import { Container, Button, TextInput, Progress, Icon } from "nes-react";
 import Select from 'react-select';
-import {Input, Slider, RangeSlider} from 'rsuite';
+import {Input, RangeSlider} from 'rsuite';
 import nesTheme from 'react-select-nes-css-theme';
 import './App.css';
 import './extra.css';
 import 'rsuite/dist/styles/rsuite-default.css';
 
+import * as centralFunc from './central_resource/central_function.js'
 import * as plaintextGraph from './graph_component/Util_plain_text.js';
 import * as tidyTreeGraph from './graph_component/tidy_tree.js';
 import * as indenttreeGraph from './graph_component/Util_indent_tree.js';
@@ -122,26 +123,6 @@ function App() {
     }
   }
 
-  function isNameInArray(name, array){
-    for(var i=0;i<array.length;i++){
-      if(array[i].name == name){
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  function getDupChildIndex(parentNode, nodeName){
-    var children = parentNode.children;
-    for(var i=0;i<children.length;i++){
-      if(children[i].name == nodeName){
-        return i;
-
-      }
-    }
-    return -1;
-  }
-
   function getInterestingnessMeasure(consequent){
     var conf = "";
     var CONF_TEXT = "";
@@ -181,19 +162,10 @@ function App() {
     lift = lift.replace(LEFT_TRI_BRACLET, SPACE).replace(RIGHT_TRI_BRACLET, SPACE);
     // console.log("lift: " + lift);
 
-    // var sup = consequent.split(CONF_TEXT)[0].trim();
-    // sup = sup.split(SPACE)[1].trim();
-    // console.log("sup: " + sup + " ruleCount: " + rulesNum);
     return {conf: conf, lift: lift};
   }
-  // function isInRangeLift(lift){
-  //   liftOpConsole
-  //   if(liftOpConsole == "<"){
-  //
-  //   }
-  // }
-
-  function rulesToJson(){
+//rule to json rstudio version
+function rulesToJson(){
     var rules = fileText.split("\n");
     var jsonRules = {name:'begin', children:[]};
     var isInFiltered = true;
@@ -204,15 +176,23 @@ function App() {
       var rule = rules[ruleIndex];
 
       if(rule==""){
-        // console.log("empty string");
         break;
       }
 
-      rule = rule.trim().split(/. (.+)/)[1];
-      var antecedent = rule.split("==>")[0].trim();
-      var antecedentArray = antecedent.split(' ');
-      antecedentArray.pop();
-      var consequent = rule.split("==>")[1].trim();
+      rule = rule.trim().split(/\s+/);
+      var antecedent = rule[1]
+      var consequent = rule[3] + " sup:"+ rule[4] + " conf:" + rule[5]
+      + " lift:" + rule[6];
+
+      // rule = rule.trim().split(/. (.+)/)[1];
+      // var antecedent = rule.split("==>")[0].trim();
+      // var antecedentArray = antecedent.split(' ');
+      var temp = antecedent.replace("{", "");
+      temp = temp.replace("}", "");
+      var antecedentArray = temp.split(",");
+
+      // antecedentArray.pop();
+      // var consequent = rule.split("==>")[1].trim();
 
 
       var interestingnessMeasures = getInterestingnessMeasure(consequent);
@@ -233,7 +213,7 @@ function App() {
       for(var i = 0; i<antecedentArray.length; i++){
         var nodeName = antecedentArray[i];
         var form = {name:nodeName, children:[]};
-        var dupChildIndex = getDupChildIndex(thisRule, antecedentArray[i]);
+        var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
         if(dupChildIndex == -1){//not duplicate
           thisRule.children.push(form);
           thisRule = thisRule.children[thisRule.children.length-1];
@@ -246,9 +226,65 @@ function App() {
       thisRule.children.push(form);
     }
     // setGraphData(thisRule)
-    handleGraphTypeChange(thisRule);
+    handleGraphTypeChange(jsonRules);
     // setFilteredGraphData(thisRule);
-  }
+}
+
+  // function rulesToJson(){
+  //   var rules = fileText.split("\n");
+  //   var jsonRules = {name:'begin', children:[]};
+  //   var isInFiltered = true;
+  //   rulesNum = rules.length;
+  //   //loop all rules
+  //    for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
+  //     var thisRule = jsonRules;
+  //     var rule = rules[ruleIndex];
+  //
+  //     if(rule==""){
+  //       break;
+  //     }
+  //
+  //     rule = rule.trim().split(/. (.+)/)[1];
+  //     var antecedent = rule.split("==>")[0].trim();
+  //     var antecedentArray = antecedent.split(' ');
+  //     antecedentArray.pop();
+  //     var consequent = rule.split("==>")[1].trim();
+  //
+  //
+  //     var interestingnessMeasures = getInterestingnessMeasure(consequent);
+  //     if(interestingnessMeasures.conf < confValueConsole.init
+  //       || interestingnessMeasures.conf > confValueConsole.des){
+  //       // console.log(interestingnessMeasures.conf)
+  //       continue;
+  //     }
+  //     if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
+  //       continue;
+  //     }
+  //
+  //     // if(interestingnessMeasures.lift < )
+  //
+  //     consequent = consequent.toString();
+  //
+  //     //loop all antecedent
+  //     for(var i = 0; i<antecedentArray.length; i++){
+  //       var nodeName = antecedentArray[i];
+  //       var form = {name:nodeName, children:[]};
+  //       var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
+  //       if(dupChildIndex == -1){//not duplicate
+  //         thisRule.children.push(form);
+  //         thisRule = thisRule.children[thisRule.children.length-1];
+  //       }else{//duplicate
+  //         thisRule = thisRule.children[dupChildIndex];
+  //       }
+  //     }
+  //     //add consequent
+  //     var form = {name:consequent};
+  //     thisRule.children.push(form);
+  //   }
+  //   // setGraphData(thisRule)
+  //   handleGraphTypeChange(thisRule);
+  //   // setFilteredGraphData(thisRule);
+  // }
 
   function setSup(value){
     supValueConsole = value;

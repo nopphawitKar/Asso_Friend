@@ -1,35 +1,24 @@
 import * as d3 from "d3";
 import { select } from 'd3-selection';
+import * as centralFunc from '../central_resource/central_function.js';
 
 export function create(treeData, selector, width, height) {
-	var tooltip = d3.select(selector)
-	.append("div")
-	.style("position", "absolute")
-	.style("z-index", "10")
-	.style("visibility", "hidden")
-	.style("background-color", "white")
+	var coord =[];
+	var i = 0,duration = 100,root;
+	var tooltip = centralFunc.createTooltip(d3, selector);
 
-	var dateStart = new Date();
-		var runtimeProblemProtecter = 1;
-		var coord =[];
-		// Set the dimensions and margins of the diagram
-		// var margin = {top: 20, right: 90, bottom: 30, left: 90},
-		//     width = 800;//960 - margin.left - margin.right,
-		//     height = 600;//(height)? height : 500;//- margin.top - margin.bottom;
 
-		var svg = d3.select(selector).append("svg")
-		    .attr("width", width)
-		    .attr("height", height)
-		  .append("g")
-		    .attr("transform", "translate("
-		          + 50 + "," + 0 + ")");
+	var svg = d3.select(selector).append("svg")
+	    .attr("width", width)
+	    .attr("height", height)
+	  .append("g")
+	    .attr("transform", "translate("
+	          + 50 + "," + 0 + ")");
 
-		var i = 0,
-		    duration = 100,
-		    root;
+
 
 		// declares a tree layout and assigns the size
-		var treemap = d3.tree().size([height - 5, width-160]);
+		var treemap = d3.tree().size([height - 5, width-200]);
 
 		// Assigns parent, children, height, depth
 		root = d3.hierarchy(treeData, function(d) { return d.children; });
@@ -113,11 +102,15 @@ export function create(treeData, selector, width, height) {
 							return 'start';
 		      })
 		      .text(function(d) {
-						if(d.data.name.length>20){
+						// if(d.data.name.length>20){
+						// 	return d.data.name.substring(0,20)+'...';
+						// }else{
+						// 	return d.data.name;
+						// }
+						if(!(d.children || d._children)){
 							return d.data.name.substring(0,20)+'...';
-						}else{
-							return d.data.name;
 						}
+						return d.data.name;
 					})
 
 		  // UPDATE
@@ -169,7 +162,7 @@ export function create(treeData, selector, width, height) {
 		      .attr("class", "link")
 		      .attr('d', function(d){
 		        var o = {x: source.x0, y: source.y0}
-		        return diagonal(o, o)
+		        return centralFunc.diagonal(o, o)
 		      });
 
 		  // UPDATE
@@ -178,14 +171,14 @@ export function create(treeData, selector, width, height) {
 		  // Transition back to the parent element position
 		  linkUpdate.transition()
 		      .duration(duration)
-		      .attr('d', function(d){ return diagonal(d, d.parent) });
+		      .attr('d', function(d){ return centralFunc.diagonal(d, d.parent) });
 
 		  // Remove any exiting links
 		  var linkExit = link.exit().transition()
 		      .duration(duration)
 		      .attr('d', function(d) {
 		        var o = {x: source.x, y: source.y}
-		        return diagonal(o, o)
+		        return centralFunc.diagonal(o, o)
 		      })
 		      .remove();
 
@@ -195,115 +188,23 @@ export function create(treeData, selector, width, height) {
 		    d.y0 = d.y;
 		  });
 
-		  // Creates a curved (diagonal) path from parent to the child nodes
-		  function diagonal(s, d) {
-
-		    var path = `M ${s.y} ${s.x}
-		            C ${(s.y + d.y) / 2} ${s.x},
-		              ${(s.y + d.y) / 2} ${d.x},
-		              ${d.y} ${d.x}`
-
-		    return path
-		  }
-
-		  // Toggle children on click.
-			function isProperDistanceNode(nodes){
-				var textTags = document.getElementsByTagName("text");
-				var maxWidth = 0;
-				var maxText = '';
-
-				for(var i=0;i<textTags.length;i++){
-					var bbox = textTags[i].getBBox();
-					var width = bbox.width;
-					if(width > maxWidth){
-						maxWidth = width;
-						maxText = textTags[i];
-					}
-				}
-
-				var radiusFrontandBack = 8;
-				var xpos = [];
-				for(var i=0;i<nodes.length;i++){
-					xpos.push(nodes[i].y0);
-				}
-				let unique = [...new Set(xpos)];
-				unique.sort(function(a, b){return b-a});
-				var lvlOfBad = 'ปลอดภัยต่อความสวยงาม';
-				for(var i=0;i<unique.length-1;i++){
-					if(unique[i] - unique[i+1] - radiusFrontandBack >= maxWidth + 5 && unique[i] - unique[i+1] - radiusFrontandBack < maxWidth + 10){
-						lvlOfBad = 'ปลอดภัยต่อการใช้งาน';
-					}else if(unique[i] - unique[i+1] - radiusFrontandBack < maxWidth + 5){
-						return 'ไม่ปลอดภัย';
-					}
-				}
-				return lvlOfBad;
-			}
 		  function click(d) {
 
-		    if (d.children) {
+		    	if (d.children) {
 		        d._children = d.children;
 		        d.children = null;
 		      } else {
 		        d.children = d._children;
 		        d._children = null;
 		      }
-					// var isSaveInDistance = isProperDistanceNode(nodes);
-					// console.log(nodes);
-					var coord = getCoord(nodes);
-					// console.log("coord:" + coord);
-					const acceptRange = 8;
-					const perfectRange = 10;
-					var unAcceptableDupCount = 0;
-					var partDupCount = 0;
-					var allNodeCount = 0;
 
-					for (const property in coord) {
-						for(var i=0;i<coord[property].length;i++){
-							var isUnAcceptableDup = false;
-							var isPartDup = false;
-							var columnArr =  coord[property];
-							var thisElement = coord[property][i];
-
-							if(i < coord[property].length-1){
-								var nextElement = coord[property][i+1];
-								if(nextElement - thisElement < acceptRange){
-									isUnAcceptableDup = true;
-								}else if(nextElement - thisElement < perfectRange){
-									isPartDup = true;
-								}
-							}
-							if(isUnAcceptableDup == true)unAcceptableDupCount++;
-							if(isPartDup == true)partDupCount++;
-							allNodeCount++;
-						}
-					}
-					console.log("จำนวนโนดไม่ปลอดภัยใช้งาน" + unAcceptableDupCount + "จำนวนโนดไม่ปลอดภัยสวยงาม" + partDupCount + "allNode:" + allNodeCount);
-					console.log("ข้อความ : " + isProperDistanceNode(nodes));
-
-		    update(d);
+					// param1 Nodes
+					//param2 acceptRange
+					//param3 perfectRange
+					centralFunc.reportGraphStatus(nodes,8,10);
+		    	update(d);
 
 		  }
 
-			function getCoord(nodes){
-				//{a:[],b:[]}
-				var arrObj = {};
-				var dupCount = 0;
-				for(var i=0;i<nodes.length;i++){
-					var y0 = nodes[i].y0;
-					var x0 = nodes[i].x0;
-					if(arrObj[ y0 ]){
-						if(arrObj[ y0 ].indexOf(x0) === -1){
-							//push
-							arrObj[ y0 ].push(x0);
-						}else{
-							dupCount++;
-						}
-					}else{
-						arrObj[y0] = [];
-						arrObj[ y0 ].push(x0);
-					}
-				}
-				return arrObj;
-			}
 		}
 }

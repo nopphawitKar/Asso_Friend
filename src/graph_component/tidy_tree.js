@@ -74,20 +74,18 @@ export function create(treeData, selector, width, height) {
 		          return d._children ? "lightsteelblue" : "#fff";
 		      })
 					.on("mouseenter", function(d){
-						return tooltip.html(d.data.name)
-						.style("left", (30 + d3.event.pageX) + "px")
-						.style("top", (30 + d3.event.pageY) + "px")
-								.style("visibility", "visible")
-								.transition()
-               .duration('300')
-
+						//is leaf
+						if(d.id == d.leaves()[0].id){
+							return centralFunc.getConsequentTooltip(d, d3, tooltip);
+						}else{
+							return centralFunc.getAntecedentTooltip(d, d3, tooltip)
+						}
 					})
 					.on("mouseleave", function(d){
 						tooltip.html(d.data.name)
 								.style("visibility", "hidden")
 								.transition()
                .duration('300');
-						// return tooltip.text(d.data.name).style("visibility", "hidden");
 					});
 
 		  // Add labels for the nodes
@@ -102,15 +100,7 @@ export function create(treeData, selector, width, height) {
 							return 'start';
 		      })
 		      .text(function(d) {
-						// if(d.data.name.length>20){
-						// 	return d.data.name.substring(0,20)+'...';
-						// }else{
-						// 	return d.data.name;
-						// }
-						if(!(d.children || d._children)){
-							return d.data.name.substring(0,20)+'...';
-						}
-						return d.data.name;
+						return centralFunc.getProperLengthText(d);
 					})
 
 		  // UPDATE

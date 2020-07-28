@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { select } from 'd3-selection';
+import * as centralFunc from '../central_resource/central_function.js';
 
 export function create(treeData, selector, width, height) {
 	var tooltip = d3.select(selector)
@@ -24,7 +25,7 @@ export function create(treeData, selector, width, height) {
 		    root;
 
 		// declares a tree layout and assigns the size
-		var treemap = d3.tree().size([360, (width/2) - 160])
+		var treemap = d3.tree().size([360, (width/2) - 200])
 	    .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 
 		// Assigns parent, children, height, depth
@@ -78,13 +79,12 @@ export function create(treeData, selector, width, height) {
 		          return d._children ? "lightsteelblue" : "#fff";
 		      })
 					.on("mouseenter", function(d){
-						return tooltip.html(d.data.name)
-						.style("left", (30 + d3.event.pageX) + "px")
-						.style("top", (30 + d3.event.pageY) + "px")
-								.style("visibility", "visible")
-								.transition()
-               .duration('300')
-
+						//is leaf
+						if(d.id == d.leaves()[0].id){
+							return centralFunc.getConsequentTooltip(d, d3, tooltip);
+						}else{
+							return centralFunc.getAntecedentTooltip(d, d3, tooltip)
+						}
 					})
 					.on("mouseleave", function(d){
 						tooltip.html(d.data.name)
@@ -104,11 +104,7 @@ export function create(treeData, selector, width, height) {
 		      .style("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
 					.attr("transform", function(d) { return "rotate(" + (d.x < 180 ? d.x - 90 : d.x + 90) + ")"; })
 		      .text(function(d) {
-						if(d.data.name.length>20){
-							return d.data.name.substring(0,20)+'...';
-						}else{
-							return d.data.name;
-						}
+						return centralFunc.getProperLengthText(d);
 					})
 
 		  // UPDATE

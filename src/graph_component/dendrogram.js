@@ -1,17 +1,15 @@
 import * as d3 from "d3";
 import { select } from 'd3-selection';
+import * as centralFunc from '../central_resource/central_function.js';
 
 export function create(treeData, selector, width, height) {
-	var dateStart = new Date();
-		var runtimeProblemProtecter = 1;
-		// Set the dimensions and margins of the diagram
-		// var margin = {top: 20, right: 90, bottom: 30, left: 90},
-		//     width = 800;//960 - margin.left - margin.right,
-		//     height = 600;//(height)? height : 500;//- margin.top - margin.bottom;
+		var tooltip = d3.select(selector)
+		.append("div")
+		.style("position", "absolute")
+		.style("z-index", "10")
+		.style("visibility", "hidden")
+		.style("background-color", "white")
 
-		// append the svg object to the body of the page
-		// appends a 'group' element to 'svg'
-		// moves the 'group' element to the top left margin
 		var svg = d3.select(selector).append("svg")
 		    .attr("width", width)
 		    .attr("height", height)
@@ -24,7 +22,7 @@ export function create(treeData, selector, width, height) {
 		    root;
 
 		// declares a tree layout and assigns the size
-		var treemap = d3.cluster().size([height - 5, width - 160]);
+		var treemap = d3.cluster().size([height - 5, width - 200]);
 
 		// Assigns parent, children, height, depth
 		root = d3.hierarchy(treeData, function(d) { return d.children; });
@@ -76,8 +74,22 @@ export function create(treeData, selector, width, height) {
 		      // .attr('r', 1e-6)
 		      .style("fill", function(d) {
 		          return d._children ? "lightsteelblue" : "#fff";
-		      });
-
+		      })
+					.on("mouseenter", function(d){
+						//is leaf
+						if(d.id == d.leaves()[0].id){
+							return centralFunc.getConsequentTooltip(d, d3, tooltip);
+						}else{
+							return centralFunc.getAntecedentTooltip(d, d3, tooltip)
+						}
+					})
+					.on("mouseleave", function(d){
+						tooltip.html(d.data.name)
+								.style("visibility", "hidden")
+								.transition()
+							 .duration('300');
+						// return tooltip.text(d.data.name).style("visibility", "hidden");
+					});
 		  // Add labels for the nodes
 		  nodeEnter.append('text')
 		      .attr("dy", ".35em")
@@ -89,12 +101,8 @@ export function create(treeData, selector, width, height) {
 		          // return d.children || d._children ? "end" : "start";
 							return 'start';
 		      })
-					.text(function(d) { if(d.data.name.length>20){
-																return d.data.name.substring(0,20)+'...';
-															}else{
-																return d.data.name;
-															}
-
+					.text(function(d) {
+							return centralFunc.getProperLengthText(d);
 					});
 
 		  // UPDATE

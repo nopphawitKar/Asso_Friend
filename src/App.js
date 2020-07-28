@@ -13,7 +13,7 @@ import * as plaintextGraph from './graph_component/Util_plain_text.js';
 import * as tidyTreeGraph from './graph_component/tidy_tree.js';
 import * as indenttreeGraph from './graph_component/Util_indent_tree.js';
 import * as tabletoolGraph from './graph_component/Util_table_tool.js';
-import * as radialGraph from './graph_component/radial_tidy_tree.js'
+import * as radialTidyTreeGraph from './graph_component/radial_tidy_tree.js'
 import * as dendrogram from './graph_component/dendrogram.js'
 import * as radialdendrogram from './graph_component/radial_dendrogram.js'
 
@@ -32,13 +32,13 @@ var fileText = "";
 
 function App() {
   const DOM_GRAPH_CLASS = ".understandGraph";
-  const GRAPH_PLAINTEXT = 0;
-  const GRAPH_INDENTTREE = 1;
-  const GRAPH_INDENTTAG = 2;
-  const GRAPH_TABLETOOL = 3;
-  const GRAPH_RADIAL = 4;
-  const GRAPH_DENDROGRAM = 5;
-  const GRAPH_RADIALDENDROGRAM = 6;
+  const GRAPH_TYPE_LIST = [plaintextGraph
+    ,indenttreeGraph
+    ,tabletoolGraph
+    ,tidyTreeGraph
+    ,radialTidyTreeGraph
+    ,dendrogram
+    ,radialdendrogram]
   const [graphType, setGraphType] = useState(0);
 
   const [graphData, setGraphData] = useState();
@@ -56,23 +56,9 @@ function App() {
   function handleGraphTypeChange(graphData){
 
     clearGraph();
-    // var before = new Date();
-    if(graphType.value == GRAPH_PLAINTEXT){
-      plaintextGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
-    }else if(graphType.value == GRAPH_INDENTTREE){
-      tidyTreeGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
-    }else if(graphType.value == GRAPH_INDENTTAG){
-      indenttreeGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
-    }else if(graphType.value == GRAPH_TABLETOOL){
-      tabletoolGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
-    }else if(graphType.value == GRAPH_RADIAL){
-      radialGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
-    }else if(graphType.value == GRAPH_DENDROGRAM){
-        dendrogram.create(graphData, DOM_GRAPH_CLASS, width, height);
-    }else if(graphType.value == GRAPH_RADIALDENDROGRAM){
-        radialdendrogram.create(graphData, DOM_GRAPH_CLASS, width, height);
+    if(GRAPH_TYPE_LIST[graphType.value]){
+      GRAPH_TYPE_LIST[graphType.value].create(graphData, DOM_GRAPH_CLASS, width, height);
     }else{
-      //default
       tidyTreeGraph.create(graphData, DOM_GRAPH_CLASS, width, height);
     }
   }
@@ -164,7 +150,7 @@ function App() {
 
     return {conf: conf, lift: lift};
   }
-//rule to json rstudio version
+//rStudio input
 function rulesToJson(){
     var rules = fileText.split("\n");
     var jsonRules = {name:'begin', children:[]};
@@ -183,17 +169,9 @@ function rulesToJson(){
       var antecedent = rule[1]
       var consequent = rule[3] + " sup:"+ rule[4] + " conf:" + rule[5]
       + " lift:" + rule[6];
-
-      // rule = rule.trim().split(/. (.+)/)[1];
-      // var antecedent = rule.split("==>")[0].trim();
-      // var antecedentArray = antecedent.split(' ');
       var temp = antecedent.replace("{", "");
       temp = temp.replace("}", "");
       var antecedentArray = temp.split(",");
-
-      // antecedentArray.pop();
-      // var consequent = rule.split("==>")[1].trim();
-
 
       var interestingnessMeasures = getInterestingnessMeasure(consequent);
       if(interestingnessMeasures.conf < confValueConsole.init
@@ -205,7 +183,59 @@ function rulesToJson(){
         continue;
       }
 
-      // if(interestingnessMeasures.lift < )
+      consequent = consequent.toString();
+
+      //loop all antecedent
+      for(var i = 0; i<antecedentArray.length; i++){
+        var nodeName = antecedentArray[i];
+        var form = {name:nodeName, children:[]};
+        var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
+        if(dupChildIndex == -1){//not duplicate
+          thisRule.children.push(form);
+          thisRule = thisRule.children[thisRule.children.length-1];
+        }else{//duplicate
+          thisRule = thisRule.children[dupChildIndex];
+        }
+      }
+      //add consequent
+      var form = {name:consequent};
+      thisRule.children.push(form);
+    }
+    handleGraphTypeChange(jsonRules);
+}
+
+  //weka input
+  function rulesToJson(){
+    var rules = fileText.split("\n");
+    var jsonRules = {name:'begin', children:[]};
+    var isInFiltered = true;
+    rulesNum = rules.length;
+
+    //loop all rules
+     for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
+      var thisRule = jsonRules;
+      var rule = rules[ruleIndex];
+
+      if(rule==""){
+        break;
+      }
+
+      rule = rule.trim().split(/. (.+)/)[1];
+      var antecedent = rule.split("==>")[0].trim();
+      var antecedentArray = antecedent.split(' ');
+      antecedentArray.pop();
+      var consequent = rule.split("==>")[1].trim();
+
+
+      var interestingnessMeasures = getInterestingnessMeasure(consequent);
+      if(interestingnessMeasures.conf < confValueConsole.init
+        || interestingnessMeasures.conf > confValueConsole.des){
+        // console.log(interestingnessMeasures.conf)
+        continue;
+      }
+      if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
+        continue;
+      }
 
       consequent = consequent.toString();
 
@@ -228,63 +258,7 @@ function rulesToJson(){
     // setGraphData(thisRule)
     handleGraphTypeChange(jsonRules);
     // setFilteredGraphData(thisRule);
-}
-
-  // function rulesToJson(){
-  //   var rules = fileText.split("\n");
-  //   var jsonRules = {name:'begin', children:[]};
-  //   var isInFiltered = true;
-  //   rulesNum = rules.length;
-  //   //loop all rules
-  //    for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
-  //     var thisRule = jsonRules;
-  //     var rule = rules[ruleIndex];
-  //
-  //     if(rule==""){
-  //       break;
-  //     }
-  //
-  //     rule = rule.trim().split(/. (.+)/)[1];
-  //     var antecedent = rule.split("==>")[0].trim();
-  //     var antecedentArray = antecedent.split(' ');
-  //     antecedentArray.pop();
-  //     var consequent = rule.split("==>")[1].trim();
-  //
-  //
-  //     var interestingnessMeasures = getInterestingnessMeasure(consequent);
-  //     if(interestingnessMeasures.conf < confValueConsole.init
-  //       || interestingnessMeasures.conf > confValueConsole.des){
-  //       // console.log(interestingnessMeasures.conf)
-  //       continue;
-  //     }
-  //     if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
-  //       continue;
-  //     }
-  //
-  //     // if(interestingnessMeasures.lift < )
-  //
-  //     consequent = consequent.toString();
-  //
-  //     //loop all antecedent
-  //     for(var i = 0; i<antecedentArray.length; i++){
-  //       var nodeName = antecedentArray[i];
-  //       var form = {name:nodeName, children:[]};
-  //       var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
-  //       if(dupChildIndex == -1){//not duplicate
-  //         thisRule.children.push(form);
-  //         thisRule = thisRule.children[thisRule.children.length-1];
-  //       }else{//duplicate
-  //         thisRule = thisRule.children[dupChildIndex];
-  //       }
-  //     }
-  //     //add consequent
-  //     var form = {name:consequent};
-  //     thisRule.children.push(form);
-  //   }
-  //   // setGraphData(thisRule)
-  //   handleGraphTypeChange(thisRule);
-  //   // setFilteredGraphData(thisRule);
-  // }
+  }
 
   function setSup(value){
     supValueConsole = value;
@@ -336,7 +310,7 @@ function rulesToJson(){
                   onChange={setGraphType}
                   options={[
                     // { value: 0, label: 'plain text' },
-                    { value: 1, label: 'tidy tree' },
+                    { value: 3, label: 'tidy tree' },
                     // { value: 2, label: 'indented tree' },
                     // { value: 3, label: 'table tool' },
                     { value: 4, label: 'radial tidy tree'},

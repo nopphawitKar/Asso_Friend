@@ -1,3 +1,5 @@
+const SPACE_REG = /\s+/;
+
 export  function getDupChildIndex(parentNode, nodeName){
   var children = parentNode.children;
   for(var i=0;i<children.length;i++){
@@ -31,7 +33,7 @@ function getCoord(nodes){
   return arrObj;
 }
 
-function isProperDistanceNode(nodes){
+function getSummaryMessage(nodes){
   var textTags = document.getElementsByTagName("text");
   var maxWidth = 0;
   var maxText = '';
@@ -63,35 +65,37 @@ function isProperDistanceNode(nodes){
   return lvlOfBad;
 }
 
-export function reportGraphStatus(nodes, acceptRange, perfectRange){
+export function reportGraphStatus(nodes, usabilityThreatRange, goodlookingThreatRange){
   var coord = getCoord(nodes);
 
-  var unAcceptableDupCount = 0;
-  var partDupCount = 0;
+  var usabilityThreatCount = 0;
+  var goodLookingThreatCount = 0;
   var allNodeCount = 0;
 
   for (const property in coord) {
     for(var i=0;i<coord[property].length;i++){
-      var isUnAcceptableDup = false;
-      var isPartDup = false;
+      var isUsabilityOverlap = false;
+      var isGoodLookingThreatOverlap = false;
       var columnArr =  coord[property];
       var thisElement = coord[property][i];
 
       if(i < coord[property].length-1){
         var nextElement = coord[property][i+1];
-        if(nextElement - thisElement < acceptRange){
-          isUnAcceptableDup = true;
-        }else if(nextElement - thisElement < perfectRange){
-          isPartDup = true;
+        if(nextElement - thisElement < usabilityThreatRange){
+          isUsabilityOverlap = true;
+        }else if(nextElement - thisElement < goodlookingThreatRange){
+          isGoodLookingThreatOverlap = true;
         }
       }
-      if(isUnAcceptableDup == true)unAcceptableDupCount++;
-      if(isPartDup == true)partDupCount++;
+      if(isUsabilityOverlap == true)usabilityThreatCount++;
+      if(isGoodLookingThreatOverlap == true)goodLookingThreatCount++;
       allNodeCount++;
     }
   }
-  console.log("จำนวนโนดไม่ปลอดภัยใช้งาน" + unAcceptableDupCount + "จำนวนโนดไม่ปลอดภัยสวยงาม" + partDupCount + "allNode:" + allNodeCount);
-  console.log("ข้อความ : " + isProperDistanceNode(nodes));
+  console.log("จำนวนโนดภัยต่อการใช้งาน" + usabilityThreatCount
+  + "จำนวนโนดภัยต่อความสวยงาม(ไม่นับรวมโนดภัยต่อการใช้งาน)" + goodLookingThreatCount
+  + "จำนวนโนดทั้งหมด:" + allNodeCount);
+  console.log("ข้อความ : " + getSummaryMessage(nodes));
 }
 
 // Creates a curved (diagonal) path from parent to the child nodes
@@ -112,4 +116,62 @@ export function createTooltip(d3, selector){
 	.style("z-index", "10")
 	.style("visibility", "hidden")
 	.style("background-color", "white")
+}
+export function getProperLengthText(d){
+  if(!(d.children || d._children)){
+    return d.data.name.substring(0,20)+'...';
+  }
+  return d.data.name;
+}
+
+export function getAntecedentTooltip(d, d3, tooltip){
+  return tooltip.html("<div style='border-style: groove;'>"
+  + "<p style='color:black;font-weight: bold;'>"+ d.data.name +"</p>"+ "</div>")
+  .style("left", (30 + d3.event.pageX) + "px")
+  .style("top", (30 + d3.event.pageY) + "px")
+  .style("visibility", "visible")
+  .transition()
+  .duration('300');
+}
+
+export function getConsequentTooltip(d, d3, tooltip){
+  //Antecedent
+  var ancestors = d.ancestors();
+  //shift number out - pop 'begin'out
+  ancestors.shift();
+  ancestors.pop();
+  ancestors = ancestors.reverse();
+  ancestors = ancestors.map(function getName(d){
+    return d.data.name;
+  });
+  var antecedentText = "{" + ancestors.toString().replace("," + ", ") + "}";
+
+  //Consequent
+  var consequentText = d.data.name;
+
+  var RHS = [];
+
+  consequentText = consequentText.replace("<","");
+  consequentText = consequentText.replace(">","");
+  RHS = consequentText.split("conf");
+
+  var consequent = RHS[0];
+  var interestingnessMeasures = RHS[1];
+
+  var consequentArray = consequent.trim().split(SPACE_REG);
+  consequentArray.pop();
+  consequent = consequentArray.toString().replace(",", ", ")
+  consequent = "{" + consequent + "}";
+
+  return tooltip.html("<div style='border-style: groove;'>"
+  + "<p style='color:black;font-weight: bold;'>"+ antecedentText +"</p>"
+  + "<p style='color:black;font-weight: bold;'>"+ "=>" +"</p>"
+  + "<p style='color:black;font-weight: bold;'>"+ consequent +"</p>"
+  +"<p style='color:blue;font-weight: bold;'>" + "conf" + interestingnessMeasures +"</p>"
+  + "</div>")
+  .style("left", (30 + d3.event.pageX) + "px")
+  .style("top", (30 + d3.event.pageY) + "px")
+  .style("visibility", "visible")
+  .transition()
+  .duration('300');
 }

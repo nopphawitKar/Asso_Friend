@@ -71,9 +71,15 @@ section {
 .right {
   float: right;
 }
-.text_align_center{
+.text_align_center {
   text-align: center;
 }
+/* nes */
+.avatar_config {
+  margin: 10px;
+  border: black 1px solid;
+}
+
 .nes-input-number {
   text-align: right;
 }
@@ -226,125 +232,6 @@ g > .box_text {
   /* pointer-events: all; */
 }
 
-/* g > text:hover{
-  display: none;
-} */
-
-/*App*/
-.App-container {
-  height: 100%;
-  margin-top: 200px;
-}
-
-/*Signup*/
-.Signup-container {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  padding: 10px;
-}
-.Signup-form {
-  display: grid;
-  grid-template-columns: auto auto auto auto auto auto auto auto;
-  padding: 10px;
-  grid-column: 2 / span 1;
-}
-.Signup-label {
-  grid-column: 3 / span 2;
-  margin-top: 5px;
-  margin-left: 5px;
-}
-
-.Signup-input-field {
-  grid-column: 4 / span 2;
-  margin-top: 5px;
-  margin-left: 5px;
-}
-
-.Signup-button {
-  grid-column: 4 / span 2;
-  margin-top: 5px;
-  margin-left: 5px;
-}
-
-/*Login*/
-.Login-container {
-  display: grid;
-  grid-template-columns: 50% 50%;
-  grid-template-rows: 33% 33% 33%;
-  padding: 10px;
-}
-
-.Login-container > img {
-  grid-column: 1 / span 1;
-  grid-row: 1/span 3;
-  width: 100%;
-}
-
-@media (min-width: 601px){
-  .Login-form {
-    display: grid;
-    grid-template-columns: 100px 400px;
-    padding: 10px;
-    grid-column: 2 / span 1;
-    grid-row: 2/span 3;
-    height: 10%;
-  }
-}
-
-@media (min-width: 601px){
-  .Login-form > label{
-    grid-column: 1 / span 1;
-  }
-}
-
-@media (min-width: 601px){
-  .Login-input-field {
-    grid-column: 2 / span 1;
-    margin-top: 5px;
-    margin-left: 5px;
-  }
-}
-
-@media (min-width: 601px){
-  .Login-button {
-    grid-column: 2 / span 1;
-    margin-top: 5px;
-    margin-left: 5px;
-  }
-}
-
-@media (max-width: 601px){
-  .Login-form {
-    display: grid;
-    grid-template-columns: auto auto;
-    padding: 10px;
-    grid-column: 2 / span 1;
-    grid-row: 2/span 3;
-    height: 10%;
-  }
-}
-
-@media (max-width: 601px){
-  .Login-form > label{
-    grid-column: 1 / span 1;
-  }
-}
-
-@media (max-width: 601px){
-  .Login-input-field {
-    grid-column: 2 / span 1;
-    margin-top: 5px;
-    margin-left: 5px;
-  }
-}
-
-@media (max-width: 601px){
-  .Login-button {
-    grid-column: 2 / span 1;
-    margin-top: 5px;
-    margin-left: 5px;
-  }
-}
 /*Dashboard*/
 .nes-container-center-overwrite {
   max-width: 500px!important;
@@ -355,115 +242,18 @@ g > .box_text {
 .nes-container-normal {
   max-width: 500px!important;
 }
-.Dashboard-container {
-  /*display: grid;
-  grid-template-columns: auto auto auto auto;*/
-  /*grid-template-rows: 230px 230px 230px 230px 230px 230px 230px;*/
-/*  grid-template-rows: 50% 50%;
-  height: 100%;*/
-/*  padding-left: 10%;
-  padding-right: 10%;*/
-}
 
-.Dashboard-container img {
-  /*height: 100%;*/
-  /*vertical and centre*/
-  height: 100%;
-  /*width: 100%;*/
-  float: left;
+div.click-to-top {
+  max-width: 500px;
+  display: inline-block;
+}
+div.click-to-top span {
+  display: none;
   position: absolute;
-  /*height: 100%;*/
-  /*display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 30px;*/
-  /*grid-column: span 2;
-  grid-row: span 1;*/
+  /* bottom: 0;
+  left: 0;
+  right: 0; */
+  background: #333;
+  color: #fff;
 }
-
-.Dashboard-overlay {
-    width: 200px;
-    height: 100px;
-    background: white;
-    position: absolute;
-    background: #c5170e;
-}
-
-.Dashboard-overlay > .text {
-    margin-top: 25px;
-    margin-left: 25px;
-    margin-right: 25px;
-    margin-bottom: 25px;
-
-    color: white;
-    text-align: center;
-    font-weight: bold;
-    font-size: 20px;
-}
-
-/*Understand*/
-.Understand-container {
-
-}
-
-.Understand-test-part {
-  width: 1000px;
-  min-width: 1000px;
-  max-width: 1000px;
-  height: 100%;
-  /* float: left; */
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.Understand-progress-box {
-  width: 500px;
-  min-width: 500px;
-  height: 100%;
-  border: solid 1px;
-  float: left;
-  margin-left: 50px;
-  background-color: #c5170e;
-}
-
-.Understand-progress-bar {
-  width: 500px;
-  min-width: 500px;
-  height: 50px;
-  border: solid 1px;
-  float: left;
-
-  padding-top: 20px;
-  /*padding-left: 10px;*/
-}
-
-.Understand-progress-bar svg{
-  margin-left: 20px;
-}
-
-div.tooltip {
-    position: absolute;
-    text-align: center;
-    width: 60px;
-    height: 28px;
-    padding: 2px;
-    font: 12px sans-serif;
-    background: lightsteelblue;
-    border: 0px;
-    border-radius: 8px;
-    pointer-events: none;
-}
-
-div.tooltip {
-    position: absolute;
-    text-align: center;
-    width: 60px;
-    height: 28px;
-    padding: 2px;
-    font: 12px sans-serif;
-    background: lightsteelblue;
-    border: 0px;
-    border-radius: 8px;
-    pointer-events: none;
-    background-color: white;
-}
+div.click-to-top:hover span {display: block; }

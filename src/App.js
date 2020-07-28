@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import logo from './logo.svg';
-import { Container, Button, TextInput, Progress, Icon } from "nes-react";
+import { Container, Button, TextInput, Progress, Icon, Avatar } from "nes-react";
 import Select from 'react-select';
 import {Input, RangeSlider} from 'rsuite';
 import nesTheme from 'react-select-nes-css-theme';
@@ -29,6 +29,8 @@ var liftOpConsole = ">=";
 var liftValueConsole = 0;
 
 var fileText = "";
+
+const URL_WEKA_RULES_FILES = "https://drive.google.com/drive/folders/17Z6EhtJCfDf7EI0XZ2SC3q6nMJxVEhfu?usp=sharing";
 
 function App() {
   const DOM_GRAPH_CLASS = ".understandGraph";
@@ -279,13 +281,17 @@ function rulesToJson(){
   function setFileText(value){
     fileText = value;
   }
+
+  function goToUrl(url){
+    window.open(url)
+  }
   return (
     <div className="App">
       <Container>
         <div className='line'>
           <input type="file" id="files" name="file" />
-          <Button className='browse-btn'>Browse Files</Button>
-        <span className="file-info">Upload a file</span>
+          <Button className='browse-btn'>เพิ่มไฟล์กฎความสัมพันธ์</Button>
+        <span className="file-info">อัพโหลดไฟล์</span>
         </div>
         <div className='line'>
           <div id="byte_content"></div>
@@ -338,10 +344,22 @@ function rulesToJson(){
               <Input type="number" defaultValue={0} onChange={setLift}/>
             </div>
             <div className="divfullline">
-              <Button onClick={rulesToJson}>Create Graph</Button>
+              <Button onClick={rulesToJson}>สร้างแผนภาพ</Button>
             </div>
           </Container>
-
+          <div class="click-to-top" onClick={()=>goToUrl(URL_WEKA_RULES_FILES)}>
+            <Avatar medium={true} rounded={true} className="avatar_config"
+            src={require("./central_resource/img/download.png")}/>
+            <span>ดาวน์โหลดไฟล์กฎความสัมพันธ์</span>
+          </div>
+          <div class="click-to-top">
+            <Avatar medium={true} rounded={true} className="avatar_config"
+            src={require("./central_resource/img/teach.png")}></Avatar>
+            <span>วิธีใช้งาน:<br/>1. ดาวน์ดาวน์โหลดไฟล์กฎความสัมพันธ์หรือใช้ไฟล์กฎความสัมพันธ์ที่สร้างจากเวก้า
+            <br/>2. อัพโหลดไฟล์
+            <br/>3. ตั้งค่าการแสดงผลกฎความสัมพันธ์
+            <br/>4.ได้แผนภาพ (ทุกๆโนดบนแผนภาพสามารถซ่อนแสดงได้, เมื่อนำเคอร์เซอร์วางเหนือโนด จะแสดงข้อมูลของโนดนั้นๆและค่าความน่าสนใจ)</span>
+          </div>
 
         </div>
         <div id="graph" className="understandGraph" style={{visibility: 'visible'}} ></div>

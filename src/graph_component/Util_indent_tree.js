@@ -1,13 +1,12 @@
 import * as d3 from "d3";
 import { select, hierarchy } from 'd3-selection';
+import * as centralFunc from '../central_resource/central_function.js';
 
-export function create(treeData, selector, updater, width, height) {
-  var dateStart = new Date();
-  // console.log("line6:"+ dateStart.getTime() );
+export function create(treeData, selector, width, height) {
+	var tooltip = centralFunc.createTooltip(d3, selector);
+
   var margin = {top: 30, right: 20, bottom: 30, left: 20},
-      width = 800,
-      height = 600,
-      barHeight = 5,
+      barHeight = 20,
       barWidth = (width - margin.left - margin.right) * 0.8;
 
   var i = 0,
@@ -60,7 +59,22 @@ export function create(treeData, selector, updater, width, height) {
     var nodeEnter = node.enter().append("g")
         .attr("class", "node")
         .attr("transform", function(d) { return "translate(" + (source.y0) + "," + source.x0 + ")"; })
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .on("mouseenter", function(d){
+          //is leaf
+          if(d.id == d.leaves()[0].id){
+            return centralFunc.getConsequentTooltip(d, d3, tooltip);
+          }else{
+            return centralFunc.getAntecedentTooltip(d, d3, tooltip)
+          }
+        })
+        .on("mouseleave", function(d){
+          tooltip.html(d.data.name)
+              .style("visibility", "hidden")
+              .transition()
+             .duration('300');
+        })
+        .on("click", click);
 
     // Enter any new nodes at the parent's previous position.
     nodeEnter.append("rect")
@@ -68,14 +82,36 @@ export function create(treeData, selector, updater, width, height) {
         .attr("height", barHeight)
         .attr("width", barWidth)
         .style("fill", color)
-        .on("click", click);
+
 
     nodeEnter.append("text")
         .attr("dy", 3.5)
         // .attr("dx", 5.5 + barHeight/2)
         .attr("dx", 5.5)
         .attr("font-size", "1em")
-        .text(function(d) { return d.data.name; });
+        .text(function(d) {
+          if(d.id == d.leaves()[0].id){
+            const SPACE_REG = /\s+/;
+            var consequentText = d.data.name;
+
+            var RHS = [];
+
+            consequentText = consequentText.replace("<","");
+            consequentText = consequentText.replace(">","");
+            RHS = consequentText.split("conf");
+
+            var consequent = RHS[0];
+            var consequentArray = consequent.trim().split(SPACE_REG);
+            consequentArray.pop();
+            consequent = consequentArray.toString().replace(",", ", ")
+            consequent = "{" + consequent + "}";
+
+            return consequent;
+          }else{
+            return d.data.name;
+          }
+        })
+        .on("click", click);;
 
     // Transition nodes to their new position.
     nodeEnter.transition()
@@ -130,6 +166,7 @@ export function create(treeData, selector, updater, width, height) {
     // Stash the old positions for transition.
     root.each(function(d) {
       d.x0 = d.x;
+
       d.y0 = d.y;
     });
   }

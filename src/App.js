@@ -310,8 +310,8 @@ function rulesToJson(){
                   onChange={setGraphType}
                   options={[
                     // { value: 0, label: 'plain text' },
+                    { value: 1, label: 'indented tree' },
                     { value: 3, label: 'tidy tree' },
-                    // { value: 2, label: 'indented tree' },
                     // { value: 3, label: 'table tool' },
                     { value: 4, label: 'radial tidy tree'},
                     { value: 5, label: 'dendrogram'},

@@ -152,7 +152,7 @@ function App() {
 
     return {conf: conf, lift: lift};
   }
-  
+
   //rStudio input
   function rulesToJson(){
       var rules = fileText.split("\n");
@@ -295,7 +295,9 @@ function App() {
           <div class="click-to-top" onClick={()=>goToUrl(URL_WEKA_RULES_FILES)}>
             <Avatar medium={true} rounded={true} className="avatar_config"
             src={require("./central_resource/img/download.png")}/>
-            <span>ดาวน์โหลดไฟล์กฎความสัมพันธ์</span>
+            <span>ดาวน์โหลดไฟล์กฎความสัมพันธ์ และใช้เป็นข้อมูลเข้า (input)ได้เลย<br/>
+            หรือสามารถสร้างไฟล์กฎความสัมพันธ์ด้วยตอนเอง <br/>
+            (ขณะนี้โปรแกรมรองรับเพียงรูปแบบ aruleViz ซึ่งเป็นปลั๊กอินบน rStudio)</span>
           </div>
           <div class="click-to-top">
             <Avatar medium={true} rounded={true} className="avatar_config"

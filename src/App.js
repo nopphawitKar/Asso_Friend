@@ -152,114 +152,59 @@ function App() {
 
     return {conf: conf, lift: lift};
   }
-//rStudio input
-function rulesToJson(){
-    var rules = fileText.split("\n");
-    var jsonRules = {name:'begin', children:[]};
-    var isInFiltered = true;
-    rulesNum = rules.length;
-    //loop all rules
-     for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
-      var thisRule = jsonRules;
-      var rule = rules[ruleIndex];
-
-      if(rule==""){
-        break;
-      }
-
-      rule = rule.trim().split(/\s+/);
-      var antecedent = rule[1]
-      var consequent = rule[3] + " sup:"+ rule[4] + " conf:" + rule[5]
-      + " lift:" + rule[6];
-      var temp = antecedent.replace("{", "");
-      temp = temp.replace("}", "");
-      var antecedentArray = temp.split(",");
-
-      var interestingnessMeasures = getInterestingnessMeasure(consequent);
-      if(interestingnessMeasures.conf < confValueConsole.init
-        || interestingnessMeasures.conf > confValueConsole.des){
-        // console.log(interestingnessMeasures.conf)
-        continue;
-      }
-      if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
-        continue;
-      }
-
-      consequent = consequent.toString();
-
-      //loop all antecedent
-      for(var i = 0; i<antecedentArray.length; i++){
-        var nodeName = antecedentArray[i];
-        var form = {name:nodeName, children:[]};
-        var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
-        if(dupChildIndex == -1){//not duplicate
-          thisRule.children.push(form);
-          thisRule = thisRule.children[thisRule.children.length-1];
-        }else{//duplicate
-          thisRule = thisRule.children[dupChildIndex];
-        }
-      }
-      //add consequent
-      var form = {name:consequent};
-      thisRule.children.push(form);
-    }
-    handleGraphTypeChange(jsonRules);
-}
-
-  //weka input
+  
+  //rStudio input
   function rulesToJson(){
-    var rules = fileText.split("\n");
-    var jsonRules = {name:'begin', children:[]};
-    var isInFiltered = true;
-    rulesNum = rules.length;
+      var rules = fileText.split("\n");
+      var jsonRules = {name:'begin', children:[]};
+      var isInFiltered = true;
+      rulesNum = rules.length;
+      //loop all rules
+       for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
+        var thisRule = jsonRules;
+        var rule = rules[ruleIndex];
 
-    //loop all rules
-     for(var ruleIndex=0; ruleIndex<rules.length;ruleIndex++){
-      var thisRule = jsonRules;
-      var rule = rules[ruleIndex];
-
-      if(rule==""){
-        break;
-      }
-
-      rule = rule.trim().split(/. (.+)/)[1];
-      var antecedent = rule.split("==>")[0].trim();
-      var antecedentArray = antecedent.split(' ');
-      antecedentArray.pop();
-      var consequent = rule.split("==>")[1].trim();
-
-
-      var interestingnessMeasures = getInterestingnessMeasure(consequent);
-      if(interestingnessMeasures.conf < confValueConsole.init
-        || interestingnessMeasures.conf > confValueConsole.des){
-        // console.log(interestingnessMeasures.conf)
-        continue;
-      }
-      if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
-        continue;
-      }
-
-      consequent = consequent.toString();
-
-      //loop all antecedent
-      for(var i = 0; i<antecedentArray.length; i++){
-        var nodeName = antecedentArray[i];
-        var form = {name:nodeName, children:[]};
-        var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
-        if(dupChildIndex == -1){//not duplicate
-          thisRule.children.push(form);
-          thisRule = thisRule.children[thisRule.children.length-1];
-        }else{//duplicate
-          thisRule = thisRule.children[dupChildIndex];
+        if(rule==""){
+          break;
         }
+
+        rule = rule.trim().split(/\s+/);
+        var antecedent = rule[1]
+        var consequent = rule[3] + " sup:"+ rule[4] + " conf:" + rule[5]
+        + " lift:" + rule[6];
+        var temp = antecedent.replace("{", "");
+        temp = temp.replace("}", "");
+        var antecedentArray = temp.split(",");
+
+        var interestingnessMeasures = getInterestingnessMeasure(consequent);
+        if(interestingnessMeasures.conf < confValueConsole.init
+          || interestingnessMeasures.conf > confValueConsole.des){
+          // console.log(interestingnessMeasures.conf)
+          continue;
+        }
+        if(!eval( interestingnessMeasures.lift.toString() + liftOpConsole + liftValueConsole.toString() )){
+          continue;
+        }
+
+        consequent = consequent.toString();
+
+        //loop all antecedent
+        for(var i = 0; i<antecedentArray.length; i++){
+          var nodeName = antecedentArray[i];
+          var form = {name:nodeName, children:[]};
+          var dupChildIndex = centralFunc.getDupChildIndex(thisRule, antecedentArray[i]);
+          if(dupChildIndex == -1){//not duplicate
+            thisRule.children.push(form);
+            thisRule = thisRule.children[thisRule.children.length-1];
+          }else{//duplicate
+            thisRule = thisRule.children[dupChildIndex];
+          }
+        }
+        //add consequent
+        var form = {name:consequent};
+        thisRule.children.push(form);
       }
-      //add consequent
-      var form = {name:consequent};
-      thisRule.children.push(form);
-    }
-    // setGraphData(thisRule)
-    handleGraphTypeChange(jsonRules);
-    // setFilteredGraphData(thisRule);
+      handleGraphTypeChange(jsonRules);
   }
 
   function setSup(value){

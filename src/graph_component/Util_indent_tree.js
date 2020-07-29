@@ -90,26 +90,8 @@ export function create(treeData, selector, width, height) {
         .attr("dx", 5.5)
         .attr("font-size", "1em")
         .text(function(d) {
-          if(d.id == d.leaves()[0].id){
-            const SPACE_REG = /\s+/;
-            var consequentText = d.data.name;
+					return d.data.name;
 
-            var RHS = [];
-
-            consequentText = consequentText.replace("<","");
-            consequentText = consequentText.replace(">","");
-            RHS = consequentText.split("conf");
-
-            var consequent = RHS[0];
-            var consequentArray = consequent.trim().split(SPACE_REG);
-            consequentArray.pop();
-            consequent = consequentArray.toString().replace(",", ", ")
-            consequent = "{" + consequent + "}";
-
-            return consequent;
-          }else{
-            return d.data.name;
-          }
         })
         .on("click", click);;
 

@@ -23,7 +23,7 @@ var height = 1500;
 var lift = 1;
 var rulesNum = 0;
 
-var supValueConsole = 0;
+var supValueConsole = {init: 0, des: 1};
 var confValueConsole = {init: 0, des: 1};
 var liftOpConsole = ">=";
 var liftValueConsole = 0;
@@ -81,10 +81,10 @@ function App() {
     realInput.addEventListener('change', () => {
       const name = realInput.value.split(/\\|\//).pop();
       const truncated = name.length > 20
-        ? name.substr(name.length - 20)
+        ? name.substr(0, 19) + "..."
         : name;
+      // fileInfo.innerHTML = truncated;
       fileInfo.innerHTML = truncated;
-
       readBlob();
     });
   }
@@ -123,7 +123,12 @@ function App() {
 
     var lift = "";
     var LIFT_TEXT = "";
-
+    //get support
+    var sup = "";
+    if(consequent.includes("sup")){
+      sup = consequent.split("sup:")[1].trim();
+      sup = sup.split(SPACE)[0].trim();
+    }
     //get confidence
     if(consequent.includes("<conf")){
       CONF_TEXT = "<conf";
@@ -150,7 +155,7 @@ function App() {
     lift = lift.replace(LEFT_TRI_BRACLET, SPACE).replace(RIGHT_TRI_BRACLET, SPACE);
     // console.log("lift: " + lift);
 
-    return {conf: conf, lift: lift};
+    return {sup: sup, conf: conf, lift: lift};
   }
 
   //rStudio input
@@ -177,6 +182,11 @@ function App() {
         var antecedentArray = temp.split(",");
 
         var interestingnessMeasures = getInterestingnessMeasure(consequent);
+        if(interestingnessMeasures.sup < supValueConsole.init
+          || interestingnessMeasures.sup > supValueConsole.des){
+          // console.log(interestingnessMeasures.conf)
+          continue;
+        }
         if(interestingnessMeasures.conf < confValueConsole.init
           || interestingnessMeasures.conf > confValueConsole.des){
           // console.log(interestingnessMeasures.conf)
@@ -208,7 +218,8 @@ function App() {
   }
 
   function setSup(value){
-    supValueConsole = value;
+    supValueConsole.init = value[0];
+    supValueConsole.des = value[1];
   }
 
   function setConf(value){
@@ -271,7 +282,8 @@ function App() {
                 />
             </div>
             <div className="divfullline">
-
+              <label>Support</label>
+              <RangeSlider defaultValue={[0, 1]} step={0.1} max={1} onChange={setSup}/>
               <label>Confidence</label>
               <RangeSlider defaultValue={[0, 1]} step={0.1} max={1} onChange={setConf}/>
               <label>Lift</label>
@@ -307,9 +319,9 @@ function App() {
             <br/>3. ตั้งค่าการแสดงผลกฎความสัมพันธ์
             <br/>4.ได้แผนภาพ (ทุกๆโนดบนแผนภาพสามารถซ่อนแสดงได้, เมื่อนำเคอร์เซอร์วางเหนือโนด จะแสดงข้อมูลของโนดนั้นๆและค่าความน่าสนใจ)</span>
           </div>
-
         </div>
         <div id="graph" className="understandGraph" style={{visibility: 'visible'}} ></div>
+        <div className="foot" style={{minHeight: "300px"}}></div>
     </div>
   );
 }

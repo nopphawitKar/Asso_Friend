@@ -153,21 +153,21 @@ export function getConsequentTooltip(d, d3, tooltip){
 
   consequentText = consequentText.replace("<","");
   consequentText = consequentText.replace(">","");
-  RHS = consequentText.split("conf");
+  RHS = consequentText.split("sup");
 
   var consequent = RHS[0];
   var interestingnessMeasures = RHS[1];
 
   var consequentArray = consequent.trim().split(SPACE_REG);
-  consequentArray.pop();
+  // consequentArray.pop();
   consequent = consequentArray.toString().replace(",", ", ")
-  consequent = "{" + consequent + "}";
+  // consequent = "{" + consequent + "}";
 
   return tooltip.html("<div style='border-style: groove;'>"
   + "<p style='color:black;font-weight: bold;'>"+ antecedentText +"</p>"
   + "<p style='color:black;font-weight: bold;'>"+ "=>" +"</p>"
   + "<p style='color:black;font-weight: bold;'>"+ consequent +"</p>"
-  +"<p style='color:blue;font-weight: bold;'>" + "conf" + interestingnessMeasures +"</p>"
+  +"<p style='color:blue;font-weight: bold;'>" + "sup" + interestingnessMeasures +"</p>"
   + "</div>")
   .style("left", (30 + d3.event.pageX) + "px")
   .style("top", (30 + d3.event.pageY) + "px")
